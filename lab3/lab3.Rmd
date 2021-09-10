@@ -2,7 +2,8 @@
 title: "Lab 3 - Exploratory Data Analysis"
 author: "Gene Nguyen"
 date: "9/10/2021"
-output: rmarkdown::github_document
+output: github_document
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}

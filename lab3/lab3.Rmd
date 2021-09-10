@@ -1,0 +1,147 @@
+---
+title: "Lab 3 - Exploratory Data Analysis"
+author: "Gene Nguyen"
+date: "9/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Load Libraries
+```{r message = FALSE}
+# Load packages
+library(tidyverse)
+library(leaflet)
+library(lubridate)
+```
+
+Set Workspace
+```{r}
+setwd("C:/Users/Eugen/Desktop/PM566/PM565-labs/lab3")
+```
+
+### 1. Read in Data
+```{r}
+download.file("https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz", "met_all.gz", method="libcurl", timeout = 60)
+met <- data.table::fread("met_all.gz")
+```
+
+### 2. Check the dimensions, headers, footers. How many columns, rows are there?
+```{r}
+# Dimension
+dim(met)
+# Rows
+nrow(met)
+# Columns
+ncol(met)
+# Header
+head(met)
+# Footer
+tail(met)
+```
+
+There are 30 columns and 2377343 in the met dataset.
+
+### 3. Take a look at the variables
+```{r}
+str(met)
+```
+
+
+### 4. Take a closer look at key variables
+```{r}
+table(met$year)
+table(met$day)
+table(met$hour)
+summary(met$temp)
+summary(met$elev)
+```
+
+Elevation looks like <- it has missing values (max = 9999). Replace with NA
+```{r}
+met[met$elev == 9999.0] <- NA
+summary(met$elev)
+```
+
+At what elevation is the highest weather station?
+- The weather station with highest elevation is 4113 meters.
+- This is after replacing 9999.0 values with the appropriate code for “missing”, which is “NA”.
+
+There is a minimum temperature of -40...doesn't seem plausible so we should remove
+```{r}
+met <- met[temp>-40]
+met2 <- met[order(temp)]
+head(met2)
+```
+
+### 5. Check the data against an external data source.
+```{r}
+met <- met[temp>-15]
+met2 <- met[order(temp)]
+head(met2)
+```
+
+# 6. Calculate summary statistics
+```{r}
+elev <- met[elev==max(elev)]
+summary(elev)
+
+# Correlation (temp vs. wind)
+cor(elev$temp, elev$wind.sp, use="complete")
+# Correlation (temp vs time)
+cor(elev$temp, elev$hour, use="complete")
+# Correlation (wind vs time)
+cor(elev$wind.sp, elev$day, use="complete")
+# Correlation (wind vs time)
+cor(elev$wind.sp, elev$hour, use="complete")
+# Correlation (wind vs time)
+cor(elev$temp, elev$day, use="complete")
+```
+
+# 7. Exploratory Graphs
+```{r}
+# Histogram of Elevation
+hist(met$elev, breaks=100)
+
+# Histogram of Temperature
+hist(met$temp)
+
+# Histogram of Wind
+hist(met$wind.sp)
+```
+
+Wind speed and elevation look skewed. Possibly look to log transform in the future.
+
+Location - Weather station with the highest elevation
+```{r}
+leaflet(elev) %>%
+  addProviderTiles('OpenStreetMap') %>%
+  addCircles(lat=~lat,lng=~lon, opacity=1, fillOpacity=1, radius=100)
+```
+
+Look at the time series of temperature and wind speed at this location.
+For this we will need to create a date-time variable for the x-axis.
+```{r}
+elev$date <- with(elev, ymd_h(paste(year, month, day, hour, sep= ' ')))
+summary(elev$date)
+
+# Order
+elev <- elev[order(date)]
+head(elev)
+```
+
+Time Series: Temperature
+```{r}
+plot(elev$date, elev$temp, type='l')
+```
+
+There appears to be seasonality with temperature. It seems to steadily fluctuate every other day.
+
+Time Series: Wind
+```{r}
+plot(elev$date, elev$wind.sp, type='l')
+```
+
+There appears to be seasonality with wind, but much more erratic. There is more chaotic fluctuation when compared to temperature.

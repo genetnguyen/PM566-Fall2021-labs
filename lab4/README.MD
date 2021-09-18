@@ -3,6 +3,7 @@ title: "Lab 4 - Data Visualization"
 author: "Gene Nguyen"
 date: "9/17/2021"
 output: github_document
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}

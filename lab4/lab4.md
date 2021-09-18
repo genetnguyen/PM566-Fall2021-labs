@@ -342,8 +342,8 @@ temp.pal
     ##     }
     ##     pf(rescaled)
     ## }
-    ## <bytecode: 0x000000002c336038>
-    ## <environment: 0x000000002c337f58>
+    ## <bytecode: 0x00000000092b42f8>
+    ## <environment: 0x00000000092b2d18>
     ## attr(,"colorType")
     ## [1] "numeric"
     ## attr(,"colorArgs")
